@@ -20,6 +20,7 @@ export class UserManager {
   addUser(name: string, socket: Socket) {
     this.users.push({ name, socket });
     this.queue.push(socket.id);
+    socket.emit('lobby')
     this.clearQueue();
     this.initHandlers(socket);
   }
@@ -31,13 +32,19 @@ export class UserManager {
     if (this.queue.length < 2) {
       return;
     }
-    let user1 = this.users.find((user) => user.socket.id === this.queue.pop());
-    let user2 = this.users.find((user) => user.socket.id === this.queue.pop());
-    let roomId = this.generate();
+     console.log( "Queue Check", this.queue[0],this.queue[0]);
+     let id1 = this.queue.pop();
+     let id2 = this.queue.pop();
+   
+    let user1 = this.users.find((user) => user.socket.id === id1);
+    let user2 = this.users.find((user) => user.socket.id === id2);
+     console.log(user1, user2,"User Check",this.users.length);
+    
     if (!user1 || !user2) {
       return;
     }
     const createRoom = this.roomManager.createRoom(user1, user2);
+    this.clearQueue()
   }
 
   generate() {
@@ -48,7 +55,7 @@ export class UserManager {
       this.roomManager.onOffer(roomId, sdp);
     });
     socket.on("answer", ({ sdp, roomId }: { sdp: string; roomId: string }) => {
-      this.roomManager.onOffer(roomId, sdp);
+      this.roomManager.onAnswer(roomId, sdp);
     });
   }
 }
