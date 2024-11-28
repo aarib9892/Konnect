@@ -16,23 +16,33 @@ class RoomManager {
             roomId,
         });
     }
-    onOffer(roomId, sdp) {
-        var _a;
-        let user2 = (_a = this.rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.user2;
-        console.log(roomId, 'user2 is' + user2);
-        user2 === null || user2 === void 0 ? void 0 : user2.socket.emit("offer", {
-            sdp,
-            roomId
+    onOffer(roomId, offer, senderSocketId) {
+        let room = this.rooms.get(roomId);
+        if (!room) {
+            return;
+        }
+        let receivingUser = room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
+        receivingUser.socket.emit("offer", {
+            offer,
+            roomId,
         });
     }
-    onAnswer(roomId, sdp) {
+    onAnswer(roomId, answer) {
         var _a;
         let user1 = (_a = this.rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.user1;
-        console.log(user1, '=> answer');
+        console.log(user1, "=> answer");
         user1 === null || user1 === void 0 ? void 0 : user1.socket.emit("answer", {
-            sdp,
-            roomId
+            answer,
+            roomId,
         });
+    }
+    onIceCandidates(can, senderSocketId, roomId, type) {
+        let room = this.rooms.get(roomId);
+        if (!room) {
+            return;
+        }
+        let receivingUser = room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
+        receivingUser.socket.emit("onIceCandidate", { can, type });
     }
     generate() {
         return GLOBAL_ROOM_ID++;

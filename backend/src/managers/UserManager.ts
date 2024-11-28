@@ -51,11 +51,15 @@ export class UserManager {
     return GLOBAL_ROOM_ID++;
   }
   initHandlers(socket: Socket) {
-    socket.on("offer", ({ sdp, roomId }: { sdp: string; roomId: string }) => {
-      this.roomManager.onOffer(roomId, sdp);
+    socket.on("offer", ({ offer, roomId }: { offer: string; roomId: string }) => {
+      this.roomManager.onOffer(roomId, offer,socket.id);
     });
-    socket.on("answer", ({ sdp, roomId }: { sdp: string; roomId: string }) => {
-      this.roomManager.onAnswer(roomId, sdp);
+    socket.on("answer", ({ answer , roomId }: { answer: string; roomId: string }) => {
+      this.roomManager.onAnswer(roomId, answer);
     });
+    socket.on('sendIceCandidate',({can , type , roomId}) => {
+      this.roomManager.onIceCandidates(can, socket.id, roomId , type);
+
+    })
   }
 }

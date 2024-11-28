@@ -1,55 +1,162 @@
-import React, { useEffect , useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { io } from "socket.io-client";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = 'http://localhost:3000';
+const URL = "http://localhost:3000";
 
-
-
-const Room = () => {
+const Room = ({ localStream }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [lobby, setLobby] = useState(false)
+  const [lobby, setLobby] = useState(false);
   const name = searchParams.get("name");
+  const [localPc, setLocalPc] = React.useState<RTCPeerConnection | undefined>(
+    undefined
+  );
+  const [receivingPc, setReceivingPc] = React.useState<
+    RTCPeerConnection | undefined
+  >(undefined);
+  const usr1Ref = useRef(null);
+  const usr2Ref = useRef(null);
+  const [remoteStream, setRemoteStream] = React.useState<
+    MediaStream | undefined
+  >(undefined);
+
+  const createConnection = (socket, roomId, type) => {
+    const peerConnection = new RTCPeerConnection();
+    localStream.getTracks().forEach((track: MediaStreamTrack) => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.ontrack = async (event) => {
+      console.log(event.streams);
+      let testtrack  =new MediaStream()
+      event.streams[0].getTracks().forEach((track) => {
+        testtrack.addTrack(track)
+      });
+      usr2Ref.current.srcObject = testtrack
+    };
+
+    peerConnection.onicecandidate = async (event) => {
+      if (event.candidate) {
+        console.log(event.candidate, "CANDIDATES");
+        socket.emit("sendIceCandidate", {
+          can: event.candidate,
+          roomId,
+        });
+      }
+    };
+    // if(type === 'sender'){
+    //    setLocalPc(peerConnection)
+    // }else{
+    //   setReceivingPc(peerConnection)
+    // }
+    return peerConnection;
+  };
+
+  const getPermission = async () => {
+    let stream = await window.navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    // let videoTrack = stream.getVideoTracks()[0];
+    // let audioTrack = stream.getAudioTracks()[0];
+    console.log(usr1Ref.current, usr2Ref.current);
+    
+
+    usr1Ref.current.srcObject = new MediaStream(stream);
+    usr1Ref.current.play = true;
+    setRemoteStream(new MediaStream());
+
+    usr2Ref.current.srcObject = remoteStream;
+     usr2Ref.current.play = true;
+  };
 
   useEffect(() => {
-   const socket = io(URL);
+    const socket = io(URL);
 
-    socket.on('connect',()=>{
-      alert('connected')
-    })
+    if (usr1Ref?.current && usr2Ref?.current) {
+      console.log(usr1Ref.current, usr2Ref.current);
+      getPermission();
+    }
 
-    socket.on('send-offer',({roomId}) => {
-      alert('please send offer')
-      socket.emit('offer',{
-        roomId
-      })
-    })
+    socket.on("connect", () => {
+      // alert("connected");
+      //  getPermission();
+    });
 
-    socket.on('offer',({roomId,offer})=>{
-      alert('please send answerr')
-      socket.emit('answer',{
-        roomId,offer
-      })
-    })
+    socket.on("send-offer", async ({ roomId }) => {
+      const peerConnection = createConnection(socket, roomId, "sender");
 
-    socket.on('answer',({roomId,offer})=>{
-      alert('Connection Established')
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      console.log("offer created");
+      setLocalPc(peerConnection);
+      console.log("I was SET", peerConnection);
 
-    })
+      socket.emit("offer", {
+        roomId,
+        offer,
+      });
+    });
 
-    socket.on('lobby',() => {
-      setLobby(true)
-    })
-  }, [name]);
+    socket.on("offer", async ({ roomId, offer }) => {
+      alert("please send answerr");
+      const peerConnection = createConnection(socket, roomId, "receiver");
+      console.log(roomId, offer, "ONOFFER");
+      peerConnection.setRemoteDescription(offer);
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      setLobby(false);
+      setReceivingPc(peerConnection);
 
+      socket.emit("answer", {
+        roomId,
+        answer,
+      });
+    });
 
-  if(lobby){
-    return <div>Waiting for you to connect with someone ....</div>
-  }
+    socket.on("answer", ({ roomId, answer }) => {
+      alert("Connection Established");
+      setLobby(false);
+      setLocalPc((pc) => {
+        pc?.setRemoteDescription(answer);
+
+        return pc;
+      });
+      // console.log(localPc,"LOCALPC",receivingPc)
+      // if (!localPc.currentRemoteDescription) {
+      //   localPc.setRemoteDescription(answer);
+      // }
+    });
+
+    socket.on("onIceCandidate", ({ can, type }) => {
+      if (type === "sender") {
+        setReceivingPc((pc) => {
+          pc?.addIceCandidate(can);
+          return pc;
+        });
+      } else {
+        setLocalPc((pc) => {
+          pc?.addIceCandidate(can);
+          return pc;
+        });
+      }
+    });
+
+    socket.on("lobby", () => {
+      setLobby(true);
+    });
+  }, [name, localStream, usr1Ref, usr2Ref]);
+
+  // if (lobby) {
+  //   return <div>Waiting for you to connect with someone ....</div>;
+  // }
 
   return (
     <>
       <div> Hi {name}</div>
+      <video ref={usr1Ref} autoPlay id="user-1"></video>
+      <video ref={usr2Ref} autoPlay id="user-2"></video>
     </>
   );
 };

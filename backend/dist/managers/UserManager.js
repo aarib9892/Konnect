@@ -40,11 +40,14 @@ class UserManager {
         return GLOBAL_ROOM_ID++;
     }
     initHandlers(socket) {
-        socket.on("offer", ({ sdp, roomId }) => {
-            this.roomManager.onOffer(roomId, sdp);
+        socket.on("offer", ({ offer, roomId }) => {
+            this.roomManager.onOffer(roomId, offer, socket.id);
         });
-        socket.on("answer", ({ sdp, roomId }) => {
-            this.roomManager.onAnswer(roomId, sdp);
+        socket.on("answer", ({ answer, roomId }) => {
+            this.roomManager.onAnswer(roomId, answer);
+        });
+        socket.on('sendIceCandidate', ({ can, type, roomId }) => {
+            this.roomManager.onIceCandidates(can, socket.id, roomId, type);
         });
     }
 }
