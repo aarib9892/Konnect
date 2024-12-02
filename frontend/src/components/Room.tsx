@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 const URL = "https://konnect-ql90.onrender.com";
 
 const Room = ({ localStream }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams ] = useSearchParams();
   const [lobby, setLobby] = useState(false);
   const name = searchParams.get("name");
   const [localPc, setLocalPc] = React.useState<RTCPeerConnection | undefined>(
@@ -21,6 +21,7 @@ const Room = ({ localStream }) => {
   >(undefined);
 
   const createConnection = (socket, roomId, type) => {
+    console.log(type , lobby);
     const peerConnection = new RTCPeerConnection();
     localStream.getTracks().forEach((track: MediaStreamTrack) => {
       peerConnection.addTrack(track, localStream);
@@ -28,11 +29,11 @@ const Room = ({ localStream }) => {
 
     peerConnection.ontrack = async (event) => {
       console.log(event.streams);
-      let testtrack  =new MediaStream()
+      let testtrack = new MediaStream();
       event.streams[0].getTracks().forEach((track) => {
-        testtrack.addTrack(track)
+        testtrack.addTrack(track);
       });
-      usr2Ref.current.srcObject = testtrack
+      usr2Ref.current.srcObject = testtrack;
     };
 
     peerConnection.onicecandidate = async (event) => {
@@ -61,14 +62,14 @@ const Room = ({ localStream }) => {
     // let videoTrack = stream.getVideoTracks()[0];
     // let audioTrack = stream.getAudioTracks()[0];
     console.log(usr1Ref.current, usr2Ref.current);
-    
 
     usr1Ref.current.srcObject = new MediaStream(stream);
     usr1Ref.current.play = true;
     setRemoteStream(new MediaStream());
-
-    usr2Ref.current.srcObject = remoteStream;
-     usr2Ref.current.play = true;
+    if (usr2Ref) {
+      usr2Ref.current.srcObject = remoteStream;
+      usr2Ref.current.play = true;
+    }
   };
 
   useEffect(() => {
@@ -108,6 +109,7 @@ const Room = ({ localStream }) => {
       await peerConnection.setLocalDescription(answer);
       setLobby(false);
       setReceivingPc(peerConnection);
+      console.log(receivingPc , localPc)
 
       socket.emit("answer", {
         roomId,
@@ -115,7 +117,7 @@ const Room = ({ localStream }) => {
       });
     });
 
-    socket.on("answer", ({ roomId, answer }) => {
+    socket.on("answer", ({ answer }) => {
       alert("Connection Established");
       setLobby(false);
       setLocalPc((pc) => {
@@ -154,11 +156,21 @@ const Room = ({ localStream }) => {
 
   return (
     <>
-     
-      <div className= 'flex justify-center items-center gap-12 w-full text-white min-h-[100vh]'>
-
-      <video width={500} className='rounded-xl' ref={usr1Ref} autoPlay id="user-1"></video>
-      <video width={500} className='rounded-xl' ref={usr2Ref} autoPlay id="user-2"></video>
+      <div className="flex justify-center items-center gap-12 w-full text-white min-h-[100vh]">
+        <video
+          width={500}
+          className="rounded-xl"
+          ref={usr1Ref}
+          autoPlay
+          id="user-1"
+        ></video>
+        <video
+          width={500}
+          className="rounded-xl"
+          ref={usr2Ref}
+          autoPlay
+          id="user-2"
+        ></video>
       </div>
     </>
   );

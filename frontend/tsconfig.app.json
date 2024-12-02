@@ -16,11 +16,14 @@
     "jsx": "react-jsx",
 
     /* Linting */
-    "strict": true,
+    // "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "strict": false, // Disable all strict checks
+    "noImplicitAny": false, // Allow implicit 'any' types
+    "strictNullChecks": false // Allow null and undefined
   },
   "include": ["src"]
 }

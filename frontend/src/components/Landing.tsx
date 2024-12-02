@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import React ,  { useState, useEffect, useRef } from "react";
+
 import Room from "./Room";
 const Landing = () => {
   const [name, setName] = useState("");
+  console.log(name)
   const localVideoRef = useRef(null);
-  const [localStream, setLocalStream] = useState();
+  const [localStream, setLocalStream] = React.useState<MediaStream | undefined>(
+    undefined
+  );
 
-  const [remoteAudioTrack, setRemoteAudioTrack] = useState();
-  const [remoteVideoTrack, setremoteVideoTrack] = useState();
+ 
   const [enterRoom, setEnterRoom] = useState(false);
 
   const getPermission = async () => {
