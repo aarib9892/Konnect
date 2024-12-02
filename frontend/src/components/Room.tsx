@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { io } from "socket.io-client";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = "http://localhost:3000";
+const URL = "https://konnect-ql90.onrender.com";
 
 const Room = ({ localStream }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -146,17 +146,20 @@ const Room = ({ localStream }) => {
     socket.on("lobby", () => {
       setLobby(true);
     });
-  }, [name, localStream, usr1Ref, usr2Ref]);
+  }, [name]);
 
   // if (lobby) {
-  //   return <div>Waiting for you to connect with someone ....</div>;
+  //   return <div className="text-white">Waiting for you to connect with someone ....</div>;
   // }
 
   return (
     <>
-      <div> Hi {name}</div>
-      <video ref={usr1Ref} autoPlay id="user-1"></video>
-      <video ref={usr2Ref} autoPlay id="user-2"></video>
+     
+      <div className= 'flex justify-center items-center gap-12 w-full text-white min-h-[100vh]'>
+
+      <video width={500} className='rounded-xl' ref={usr1Ref} autoPlay id="user-1"></video>
+      <video width={500} className='rounded-xl' ref={usr2Ref} autoPlay id="user-2"></video>
+      </div>
     </>
   );
 };
