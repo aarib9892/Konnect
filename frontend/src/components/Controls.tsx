@@ -7,12 +7,10 @@ import {
   FaPhone,
 } from "react-icons/fa";
 
-const MeetControls: React.FC = ({controlVideo , handleVideoControl}) => {
-  const [isAudioOn, setIsAudioOn] = useState(true);
-  const [isVideoOn, setIsVideoOn] = useState(true);
+const MeetControls: React.FC = ({isVideoOn , handleVideoControl , isAudioOn , handleAudioControl}) => {
 
-  const toggleAudio = () => setIsAudioOn((prev) => !prev);
-  const toggleVideo = () => setIsVideoOn((prev) => !prev);
+  
+
 
   const leaveCall = () => {
     console.log("Leaving call...");
@@ -24,7 +22,7 @@ const MeetControls: React.FC = ({controlVideo , handleVideoControl}) => {
       <div className="bg-gray-800 rounded-lg flex space-x-4 p-3 shadow-lg">
         {/* Audio Control */}
         <button
-          onClick={toggleAudio}
+          onClick={handleAudioControl}
           className={`p-3 rounded-full ${
             isAudioOn ? "bg-gray-700" : "bg-red-500"
           } text-white`}

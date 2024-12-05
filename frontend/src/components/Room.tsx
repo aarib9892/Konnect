@@ -10,7 +10,8 @@ const Room = ({ name }) => {
   const [searchParams] = useSearchParams();
   const [lobby, setLobby] = useState(false);
   const [recieversUsername, setRecieversUsername] = useState("");
-  const [controlVideo, setControlVideo] = React.useState<boolean>(true);
+  const [isVideoOn, setIsVideoOn] = React.useState<boolean>(true);
+  const [isAudioOn, setIsAudioOn] = React.useState<boolean>(true);
 
   const [localPc, setLocalPc] = React.useState<RTCPeerConnection | undefined>(
     undefined
@@ -31,16 +32,16 @@ const Room = ({ name }) => {
     console.log(type, lobby);
     const peerConnection = new RTCPeerConnection();
     localStream.getTracks().forEach((track: MediaStreamTrack) => {
-      peerConnection.addTrack(track, localStream);
+      peerConnection.addTrack(track, localStream)
     });
 
     peerConnection.ontrack = async (event) => {
-      console.log(event.streams);
+      console.log(event.streams,'opopopopo');
       let testtrack = new MediaStream();
       event.streams[0].getTracks().forEach((track) => {
-        testtrack.addTrack(track);
+        testtrack.addTrack(track)
       });
-      usr2Ref.current.srcObject = testtrack;
+      usr2Ref.current.srcObject = testtrack
     };
 
     peerConnection.onicecandidate = async (event) => {
@@ -89,13 +90,31 @@ const Room = ({ name }) => {
   };
 
   const handleVideoControl = () => {
-    console.log(controlVideo, "brgh");
-    setControlVideo((prev) => {
+    console.log(isVideoOn, "brgh");
+    setIsVideoOn((prev) => {
+      const videoTrack = localStream
+        .getTracks()
+        .find((track) => track.kind === "video");
       const updated = !prev;
       if (!updated) {
-        usr1Ref.current.style.display = "none";
+        videoTrack.enabled = false;
       } else {
-        usr1Ref.current.style.display = "block";
+        videoTrack.enabled = true;
+      }
+      return !prev;
+    });
+  };
+  const handleAudioControl = () => {
+    console.log(isAudioOn, "brgh");
+    setIsAudioOn((prev) => {
+      const audioTrack = localStream
+        .getTracks()
+        .find((track) => track.kind === "audio");
+      const updated = !prev;
+      if (!updated) {
+        audioTrack.enabled = false;
+      } else {
+        audioTrack.enabled = true;
       }
       return !prev;
     });
@@ -143,7 +162,7 @@ const Room = ({ name }) => {
       await peerConnection.setLocalDescription(answer);
 
       setReceivingPc(peerConnection);
-      console.log(receivingPc, localPc);
+      
       setLobby(false);
 
       socket.emit("answer", {
@@ -162,10 +181,6 @@ const Room = ({ name }) => {
         return pc;
       });
 
-      // console.log(localPc,"LOCALPC",receivingPc)
-      // if (!localPc.currentRemoteDescription) {
-      //   localPc.setRemoteDescription(answer);
-      // }
     });
 
     socket.on("onIceCandidate", ({ can, type }) => {
@@ -218,8 +233,10 @@ const Room = ({ name }) => {
         </div>
 
         <MeetControls
-          controlVideo={controlVideo}
+          isVideoOn={isVideoOn}
           handleVideoControl={handleVideoControl}
+          isAudioOn={isAudioOn}
+          handleAudioControl={handleAudioControl}
         />
       </div>
     </>
