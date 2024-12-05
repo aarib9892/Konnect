@@ -101,7 +101,7 @@ const Room = ({ localStream }) => {
     });
 
     socket.on("offer", async ({ roomId, offer }) => {
-      alert("please send answerr");
+      // alert("please send answerr");
       const peerConnection = createConnection(socket, roomId, "receiver");
       console.log(roomId, offer, "ONOFFER");
       peerConnection.setRemoteDescription(offer);
@@ -118,7 +118,7 @@ const Room = ({ localStream }) => {
     });
 
     socket.on("answer", ({ answer }) => {
-      alert("Connection Established");
+      // alert("Connection Established");
       setLobby(false);
       setLocalPc((pc) => {
         pc?.setRemoteDescription(answer);

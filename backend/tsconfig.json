@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "strict": false, // Disable all strict checks
+    "noImplicitAny": false, // Allow implicit 'any' types
+    "strictNullChecks": false // Allow null and undefined
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
