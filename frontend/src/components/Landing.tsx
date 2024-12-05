@@ -5,9 +5,7 @@ const Landing = () => {
   const [name, setName] = React.useState<string | undefined>('');
   console.log(name)
   const localVideoRef = useRef(null);
-  const [localStream, setLocalStream] = React.useState<MediaStream | undefined>(
-    undefined
-  );
+ 
 
  
   const [enterRoom, setEnterRoom] = useState(false);
@@ -20,7 +18,7 @@ const Landing = () => {
 
     // let videoTrack = stream.getVideoTracks()[0];
     // let audioTrack = stream.getAudioTracks()[0];
-    setLocalStream(stream);
+  
     localVideoRef.current.srcObject = new MediaStream(stream);
     localVideoRef.current.play = true;
   };
@@ -32,7 +30,7 @@ const Landing = () => {
   }, [localVideoRef]);
 
   if (enterRoom) {
-    return <Room localStream={localStream} name={name} />;
+    return <Room  name={name} />;
   }
   return (
     <div className="flex justify-center gap-12 items-center min-h-[100vh] min-w-[100vw]">

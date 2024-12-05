@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+
 import {
   FaMicrophone,
   FaMicrophoneSlash,
@@ -7,7 +7,7 @@ import {
   FaPhone,
 } from "react-icons/fa";
 
-const MeetControls: React.FC = ({isVideoOn , handleVideoControl , isAudioOn , handleAudioControl}) => {
+const MeetControls = ({isVideoOn , handleVideoControl , isAudioOn , handleAudioControl}) => {
 
   
 

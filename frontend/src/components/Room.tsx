@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+
 import { io } from "socket.io-client";
 import MeetControls from "./Controls";
 // "undefined" means the URL will be computed from the `window.location` object
@@ -7,7 +7,7 @@ import MeetControls from "./Controls";
 const URL = "http://localhost:3000";
 
 const Room = ({ name }) => {
-  const [searchParams] = useSearchParams();
+  
   const [lobby, setLobby] = useState(false);
   const [recieversUsername, setRecieversUsername] = useState("");
   const [isVideoOn, setIsVideoOn] = React.useState<boolean>(true);
@@ -29,7 +29,7 @@ const Room = ({ name }) => {
   );
 
   const createConnection = (socket, roomId, type) => {
-    console.log(type, lobby);
+    console.log(type, lobby , localPc , receivingPc);
     const peerConnection = new RTCPeerConnection();
     localStream.getTracks().forEach((track: MediaStreamTrack) => {
       peerConnection.addTrack(track, localStream)
@@ -67,8 +67,8 @@ const Room = ({ name }) => {
       video: true,
     });
 
-    const videoTrack = stream.getVideoTracks()[0];
-    const audioTrack = stream.getAudioTracks()[0];
+    // const videoTrack = stream.getVideoTracks()[0];
+    // const audioTrack = stream.getAudioTracks()[0];
 
     setLocalStream((ls) => {
       stream.getTracks().forEach((track) => {
