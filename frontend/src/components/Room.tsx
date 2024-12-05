@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { io } from "socket.io-client";
+import MeetControls from "./Controls";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = "https://konnect-ql90.onrender.com";
+// const URL = "https://konnect-ql90.onrender.com";\
+const URL = "http://localhost:3000";
 
-const Room = ({ localStream }) => {
-  const [searchParams ] = useSearchParams();
+const Room = ({ name }) => {
+  const [searchParams] = useSearchParams();
   const [lobby, setLobby] = useState(false);
-  const name = searchParams.get("name");
+  const [recieversUsername, setRecieversUsername] = useState("");
+  const [controlVideo, setControlVideo] = React.useState<boolean>(true);
+
   const [localPc, setLocalPc] = React.useState<RTCPeerConnection | undefined>(
     undefined
   );
@@ -19,9 +23,12 @@ const Room = ({ localStream }) => {
   const [remoteStream, setRemoteStream] = React.useState<
     MediaStream | undefined
   >(undefined);
+  const [localStream, setLocalStream] = React.useState<MediaStream | undefined>(
+    new MediaStream()
+  );
 
   const createConnection = (socket, roomId, type) => {
-    console.log(type , lobby);
+    console.log(type, lobby);
     const peerConnection = new RTCPeerConnection();
     localStream.getTracks().forEach((track: MediaStreamTrack) => {
       peerConnection.addTrack(track, localStream);
@@ -54,17 +61,26 @@ const Room = ({ localStream }) => {
   };
 
   const getPermission = async () => {
-    let stream = await window.navigator.mediaDevices.getUserMedia({
+    const stream = await window.navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
 
-    // let videoTrack = stream.getVideoTracks()[0];
-    // let audioTrack = stream.getAudioTracks()[0];
-    console.log(usr1Ref.current, usr2Ref.current);
+    const videoTrack = stream.getVideoTracks()[0];
+    const audioTrack = stream.getAudioTracks()[0];
 
-    usr1Ref.current.srcObject = new MediaStream(stream);
-    usr1Ref.current.play = true;
+    setLocalStream((ls) => {
+      stream.getTracks().forEach((track) => {
+        ls.addTrack(track);
+      });
+      return ls;
+    });
+    console.log(usr1Ref.current, "loop");
+    if (usr1Ref) {
+      usr1Ref.current.srcObject = localStream;
+      usr1Ref.current.play = true;
+    }
+
     setRemoteStream(new MediaStream());
     if (usr2Ref) {
       usr2Ref.current.srcObject = remoteStream;
@@ -72,13 +88,30 @@ const Room = ({ localStream }) => {
     }
   };
 
+  const handleVideoControl = () => {
+    console.log(controlVideo, "brgh");
+    setControlVideo((prev) => {
+      const updated = !prev;
+      if (!updated) {
+        usr1Ref.current.style.display = "none";
+      } else {
+        usr1Ref.current.style.display = "block";
+      }
+      return !prev;
+    });
+  };
   useEffect(() => {
-    const socket = io(URL);
-
     if (usr1Ref?.current && usr2Ref?.current) {
-      console.log(usr1Ref.current, usr2Ref.current);
       getPermission();
     }
+  }, []);
+
+  useEffect(() => {
+    const socket = io(URL, {
+      query: {
+        userName: name,
+      },
+    });
 
     socket.on("connect", () => {
       // alert("connected");
@@ -100,16 +133,18 @@ const Room = ({ localStream }) => {
       });
     });
 
-    socket.on("offer", async ({ roomId, offer }) => {
+    socket.on("offer", async ({ roomId, offer, username }) => {
       // alert("please send answerr");
+      setRecieversUsername(username);
       const peerConnection = createConnection(socket, roomId, "receiver");
       console.log(roomId, offer, "ONOFFER");
       peerConnection.setRemoteDescription(offer);
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
-      setLobby(false);
+
       setReceivingPc(peerConnection);
-      console.log(receivingPc , localPc)
+      console.log(receivingPc, localPc);
+      setLobby(false);
 
       socket.emit("answer", {
         roomId,
@@ -117,14 +152,16 @@ const Room = ({ localStream }) => {
       });
     });
 
-    socket.on("answer", ({ answer }) => {
+    socket.on("answer", ({ answer, username }) => {
       // alert("Connection Established");
+      setRecieversUsername(username);
       setLobby(false);
       setLocalPc((pc) => {
         pc?.setRemoteDescription(answer);
 
         return pc;
       });
+
       // console.log(localPc,"LOCALPC",receivingPc)
       // if (!localPc.currentRemoteDescription) {
       //   localPc.setRemoteDescription(answer);
@@ -148,7 +185,7 @@ const Room = ({ localStream }) => {
     socket.on("lobby", () => {
       setLobby(true);
     });
-  }, [name]);
+  }, []);
 
   // if (lobby) {
   //   return <div className="text-white">Waiting for you to connect with someone ....</div>;
@@ -156,21 +193,34 @@ const Room = ({ localStream }) => {
 
   return (
     <>
-      <div className="flex justify-center items-center gap-12 w-full text-white min-h-[100vh]">
-        <video
-          width={500}
-          className="rounded-xl"
-          ref={usr1Ref}
-          autoPlay
-          id="user-1"
-        ></video>
-        <video
-          width={500}
-          className="rounded-xl"
-          ref={usr2Ref}
-          autoPlay
-          id="user-2"
-        ></video>
+      <div className="flex justify-center flex-col items-center gap-12 w-full text-white min-h-[100vh]">
+        {lobby && <h1 className="tet-2xl">Waiting for others to join...</h1>}
+        <div className="flex justify-center items-center gap-12 w-full">
+          {" "}
+          <div className="w-[40%]">
+            <video
+              className="rounded-xl w-full"
+              ref={usr1Ref}
+              autoPlay
+              id="user-1"
+            ></video>
+            <h2>{name}</h2>
+          </div>
+          <div className={`${lobby ? "hidden" : "block"}  w-[40%] `}>
+            <video
+              className={`rounded-xl w-full`}
+              ref={usr2Ref}
+              autoPlay
+              id="user-2"
+            ></video>
+            <h2>{recieversUsername}</h2>
+          </div>
+        </div>
+
+        <MeetControls
+          controlVideo={controlVideo}
+          handleVideoControl={handleVideoControl}
+        />
       </div>
     </>
   );

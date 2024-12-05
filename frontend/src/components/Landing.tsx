@@ -2,7 +2,7 @@ import React ,  { useState, useEffect, useRef } from "react";
 
 import Room from "./Room";
 const Landing = () => {
-  const [name, setName] = useState("");
+  const [name, setName] = React.useState<string | undefined>('');
   console.log(name)
   const localVideoRef = useRef(null);
   const [localStream, setLocalStream] = React.useState<MediaStream | undefined>(
@@ -32,7 +32,7 @@ const Landing = () => {
   }, [localVideoRef]);
 
   if (enterRoom) {
-    return <Room localStream={localStream} />;
+    return <Room localStream={localStream} name={name} />;
   }
   return (
     <div className="flex justify-center gap-12 items-center min-h-[100vh] min-w-[100vw]">
@@ -51,7 +51,7 @@ const Landing = () => {
           onChange={(e) => setName(e.target.value)}
           type="text"
         />
-      <button className='bg-[#00b687] rounded-xl p-6 text-white uppercase text-2xl' onClick={() => setEnterRoom(true)}>Join</button>
+      <button disabled={name.length === 0 && true} className='bg-[#00b687] rounded-xl p-6 text-white uppercase text-2xl' onClick={() => setEnterRoom(true)}>Join</button>
       </div>
     </div>
   );

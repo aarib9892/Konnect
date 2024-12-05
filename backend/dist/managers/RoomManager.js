@@ -25,15 +25,18 @@ class RoomManager {
         receivingUser.socket.emit("offer", {
             offer,
             roomId,
+            username: room.user1.name
         });
     }
     onAnswer(roomId, answer) {
-        var _a;
-        let user1 = (_a = this.rooms.get(roomId)) === null || _a === void 0 ? void 0 : _a.user1;
+        let room = this.rooms.get(roomId);
+        let user2 = room === null || room === void 0 ? void 0 : room.user2;
+        let user1 = room === null || room === void 0 ? void 0 : room.user1;
         console.log(user1, "=> answer");
         user1 === null || user1 === void 0 ? void 0 : user1.socket.emit("answer", {
             answer,
             roomId,
+            username: user2 === null || user2 === void 0 ? void 0 : user2.name
         });
     }
     onIceCandidates(can, senderSocketId, roomId, type) {

@@ -12,8 +12,11 @@ const io = new socket_io_1.Server(server, {
 const port = process.env.PORT || 3000;
 let userManager = new UserManager_1.UserManager();
 io.on("connection", (socket) => {
-    console.log("user connected");
-    userManager.addUser('randomName', socket);
+    console.log("user connected", socket.handshake.query.userName);
+    const username = socket.handshake.query.userName;
+    if (username) {
+        userManager.addUser(username, socket);
+    }
 });
 server.listen(port, function () {
     console.log(`Listening on port ${port}`);

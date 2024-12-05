@@ -33,14 +33,19 @@ export class RoomManager {
     receivingUser.socket.emit("offer", {
       offer,
       roomId,
+      username:room.user1.name
     });
   }
   onAnswer(roomId: string, answer: string) {
-    let user1 = this.rooms.get(roomId)?.user1;
+    let room = this.rooms.get(roomId)
+    let user2 = room?.user2
+    let user1 = room?.user1;
     console.log(user1, "=> answer");
     user1?.socket.emit("answer", {
       answer,
       roomId,
+      username:user2?.name
+      
     });
   }
 
