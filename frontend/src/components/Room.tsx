@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import MeetControls from "./Controls";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = "https://15.206.148.72:3000"
+const URL = "http://15.206.148.72:3000"
 // const URL = "http://localhost:3000";
 
 const Room = ({ name }) => {
