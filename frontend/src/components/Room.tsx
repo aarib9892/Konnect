@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import MeetControls from "./Controls";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = "https://konnect-ql90.onrender.com"
+const URL = "https://15.206.148.72:3000"
 // const URL = "http://localhost:3000";
 
 const Room = ({ name }) => {
@@ -18,7 +18,7 @@ const Room = ({ name }) => {
   );
   const [receivingPc, setReceivingPc] = React.useState<
     RTCPeerConnection | undefined
-  >(undefined);
+  >(undefined)
   const usr1Ref = useRef(null);
   const usr2Ref = useRef(null);
   const [remoteStream, setRemoteStream] = React.useState<
@@ -53,6 +53,9 @@ const Room = ({ name }) => {
         });
       }
     };
+    peerConnection.oniceconnectionstatechange = async (event) => {
+      console.log(event , peerConnection.iceConnectionState)
+    }
     // if(type === 'sender'){
     //    setLocalPc(peerConnection)
     // }else{
@@ -139,10 +142,18 @@ const Room = ({ name }) => {
 
     socket.on("send-offer", async ({ roomId }) => {
       const peerConnection = createConnection(socket, roomId, "sender");
+      peerConnection.onnegotiationneeded = async () =>{
+        const offer = await peerConnection.createOffer()
+        socket.emit("offer", {
+          roomId,
+          offer,
+        });
+
+      }
 
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
-      console.log("offer created");
+      console.log("offer created",offer);
       setLocalPc(peerConnection);
       console.log("I was SET", peerConnection);
 
@@ -175,6 +186,7 @@ const Room = ({ name }) => {
       // alert("Connection Established");
       setRecieversUsername(username);
       setLobby(false);
+      console.log("tytytytytyty", "offer created", answer);
       setLocalPc((pc) => {
         pc?.setRemoteDescription(answer);
 
