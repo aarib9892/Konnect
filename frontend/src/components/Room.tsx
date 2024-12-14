@@ -11,6 +11,11 @@ const servers = {
     {
       urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
     },
+    {
+      urls: "turn:ws-turn1.xirsys.com",
+      username: "aarib",
+      credential: "f35064c0-ba4f-11ef-a8f3-0242ac150003",
+    },
   ],
 };
 
