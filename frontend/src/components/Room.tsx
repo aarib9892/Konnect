@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import MeetControls from "./Controls";
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = "https://54.165.146.69/";
+const URL = "https://konnect-ql90.onrender.com";
 // const URL = "http://localhost:3000";
 
 const servers = {
