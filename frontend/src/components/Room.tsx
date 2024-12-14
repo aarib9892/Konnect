@@ -6,6 +6,14 @@ import MeetControls from "./Controls";
 const URL = "https://54.165.146.69/";
 // const URL = "http://localhost:3000";
 
+const servers = {
+  iceServers: [
+    {
+      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+    },
+  ],
+};
+
 const Room = ({ name }) => {
   
   const [lobby, setLobby] = useState(false);
@@ -30,7 +38,7 @@ const Room = ({ name }) => {
 
   const createConnection = (socket, roomId, type) => {
     console.log(type, lobby , localPc , receivingPc);
-    const peerConnection = new RTCPeerConnection();
+    const peerConnection = new RTCPeerConnection(servers);
     localStream.getTracks().forEach((track: MediaStreamTrack) => {
       peerConnection.addTrack(track, localStream)
     });
