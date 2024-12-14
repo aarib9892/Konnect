@@ -59,6 +59,7 @@ export class RoomManager {
     if (!room) {
       return;
     }
+    console.log('CANDIDATES=>',can)
     let receivingUser =
       room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
     receivingUser.socket.emit("onIceCandidate", { can , type });
