@@ -7,6 +7,7 @@ const URL = "https://konnect-ql90.onrender.com";
 // const URL = "http://localhost:3000";
 
 const servers = {
+  iceTransportPolicy: "relay", // Forces usage of TURN server only
   iceServers: [
     {
       urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
